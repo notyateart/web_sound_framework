@@ -1,3 +1,12 @@
+// TODO: Different UI for testing, maybe with sound designs for themes
+
+
+
+
+
+
+
+
 // Options for Site Owners
 
 //If activated displays a prompt before site entry to enable the audio context
@@ -16,15 +25,20 @@ const audioUrls = [
     "audio/woosh.mp3",
     "audio/loop.wav"
 ];
-
+var indexDef = 0;
+var indexImp = 1;
+var indexHov = 2;
+var indexHold = 3;
 
 // Change these values to CSS selectors (usually classes) provided by your CSS framework
 // or use the default ones and apply them manually
 // separate multiple selectors by comma
-var defaultSoundSelector = ".btn-close, .btn-primary, .btn-secondary, .nav-item";
-var importantSoundSelector = ".btn-warning, .btn-success, .btn-danger";
-var hoverSoundSelector = ".bsoundHover";
-var holdSoundSelector = "input[type='range']";
+var soundSelectDefault = ".btn-close, .btn-primary, .btn-secondary, .nav-item";
+var soundSelectImportant = ".btn-warning, .btn-success, .btn-danger";
+var soundSelectHover = ".bsoundHover";
+var soundSelectHold = "input[type='range']";
+
+audioContext.createMediaElementSource();
 
 
 
@@ -40,27 +54,27 @@ var holdSoundSelector = "input[type='range']";
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioContext = new AudioContext();
 
-const masterGainNode = audioContext.createGain();
-masterGainNode.gain = 0.8;
-const mixerDefGain = audioContext.createGain();
-mixerDefGain.gain = 0.8;
-const mixerImpGain = audioContext.createGain();
-mixerImpGain.gain = 0.8;
-const mixerHoverGain = audioContext.createGain();
-mixerHoverGain.gain = 0.8;
-const mixerHoldGain = audioContext.createGain();
-mixerHoldGain.gain = 0.8;
+const gainNodeMaster = audioContext.createGain();
+gainNodeMaster.gain = 0.8;
+const gainNodeDefault = audioContext.createGain();
+gainNodeDefault.gain = 0.8;
+const gainNodeImportant = audioContext.createGain();
+gainNodeImportant.gain = 0.8;
+const gainNodeHover = audioContext.createGain();
+gainNodeHover.gain = 0.8;
+const gainNodeHold = audioContext.createGain();
+gainNodeHold.gain = 0.8;
 
-const fadeInOutGainNode = audioContext.createGain();
+const gainNodeFadeInOut = audioContext.createGain();
 
 class VolumeGroup {
     volume = 0.8;
-    volumeMuted = false;
+    muted = false;
     type;
 
-    constructor(volume, volumeMuted, type) {
+    constructor(volume, muted, type) {
         this.volume = volume
-        this.volumeMuted = volumeMuted;
+        this.muted = muted;
         this.type = type;
     }
 
@@ -69,52 +83,52 @@ class VolumeGroup {
         this.updateLocalStorage();
     }
 
-    setVolumeMuted(volumeMuted) {
-        this.volumeMuted = volumeMuted;
+    setVolumeMuted(muted) {
+        this.muted = muted;
         this.updateLocalStorage();
     }
 
     getVolume() { return this.volume }
-    getVolumeMuted() { return this.volumeMuted }
-    getCurrentVol() { return this.volume * this.volumeMuted }
+    getVolumeMuted() { return this.muted }
+    getCurrentVol() { return this.volume * this.muted }
 
     updateLocalStorage() {
         switch (this.type) {
             case "master":
-                localStorage.masterVol = this.volume;
-                localStorage.masterVolMuted = this.volumeMuted;
-                masterGainNode.gain.setTargetAtTime(this.volume * !this.volumeMuted, 0, 0);
+                localStorage.volMaster = this.volume;
+                localStorage.volMasterMuted = this.muted;
+                gainNodeMaster.gain.setTargetAtTime(this.volume * !this.muted, 0, 0);
                 break;
-            case "mixerDefault":
-                localStorage.mixerDefault = this.volume;
-                localStorage.mixerDefaultMuted = this.volumeMuted;
-                mixerDefGain.gain.setTargetAtTime(this.volume * !this.volumeMuted, 0, 0);
+            case "default":
+                localStorage.volDefault = this.volume;
+                localStorage.volDefaultMuted = this.muted;
+                gainNodeDefault.gain.setTargetAtTime(this.volume * !this.muted, 0, 0);
                 break;
-            case "mixerImportant":
-                localStorage.mixerImportant = this.volume;
-                localStorage.mixerImportantMuted = this.volumeMuted;
-                mixerImpGain.gain.setTargetAtTime(this.volume * !this.volumeMuted, 0, 0);
+            case "important":
+                localStorage.volImportant = this.volume;
+                localStorage.volImportantMuted = this.muted;
+                gainNodeImportant.gain.setTargetAtTime(this.volume * !this.muted, 0, 0);
                 break;
-            case "mixerHover":
-                localStorage.mixerHover = this.volume;
-                localStorage.mixerHoverMuted = this.volumeMuted;
-                mixerHoverGain.gain.setTargetAtTime(this.volume * !this.volumeMuted, 0, 0);
+            case "hover":
+                localStorage.volHover = this.volume;
+                localStorage.volHoverMuted = this.muted;
+                gainNodeHover.gain.setTargetAtTime(this.volume * !this.muted, 0, 0);
                 break;
-            case "mixerHold":
-                localStorage.mixerHold = this.volume;
-                localStorage.mixerHoldMuted = this.volumeMuted;
-                mixerHoldGain.gain.setTargetAtTime(this.volume * !this.volumeMuted, 0, 0);
+            case "hold":
+                localStorage.volHold = this.volume;
+                localStorage.volHoldMuted = this.muted;
+                gainNodeHold.gain.setTargetAtTime(this.volume * !this.muted, 0, 0);
                 break;
         }
     }
 }
 
 
-var masterVol = new VolumeGroup(0.8, false, "master");
-var mixerVolDef = new VolumeGroup(0.8, false, "mixerDefault");
-var mixerVolImp = new VolumeGroup(0.8, false, "mixerImportant");
-var mixerVolHov = new VolumeGroup(0.8, false, "mixerHover");
-var mixerVolHold = new VolumeGroup(0.8, false, "mixerHold");
+var volMaster = new VolumeGroup(0.8, false, "master");
+var volDefault = new VolumeGroup(0.8, false, "default");
+var volImportant = new VolumeGroup(0.8, false, "important");
+var volHover = new VolumeGroup(0.8, false, "hover");
+var volHold = new VolumeGroup(0.8, false, "hold");
 
 
 let samples;
@@ -144,21 +158,21 @@ async function audioFilesToBuffers(urls) {
 function playDefaultSample(audioBuffer) {
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    source.connect(mixerDefGain).connect(masterGainNode).connect(audioContext.destination);
+    source.connect(gainNodeDefault).connect(gainNodeMaster).connect(audioContext.destination);
     source.start(0);
 }
 
 function playImportantSample(audioBuffer) {
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    source.connect(mixerImpGain).connect(masterGainNode).connect(audioContext.destination);
+    source.connect(gainNodeImportant).connect(gainNodeMaster).connect(audioContext.destination);
     source.start(0);
 }
 
 function playHoverSample(audioBuffer) {
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    source.connect(mixerHoverGain).connect(masterGainNode).connect(audioContext.destination);
+    source.connect(gainNodeHover).connect(gainNodeMaster).connect(audioContext.destination);
     source.start(0);
 }
 
@@ -166,13 +180,14 @@ var loopSampleSource = undefined;
 
 function playHoldSample(audioBuffer, time) {
     if (loopSampleSource != undefined) {
+        loopSampleSource.stop(0);
         loopSampleSource = undefined;
-        fadeInOutGainNode.gain.setTargetAtTime(0, 0, 0);
+        gainNodeFadeInOut.gain.setTargetAtTime(0, 0, 0);
     }
     loopSampleSource = audioContext.createBufferSource();
     loopSampleSource.buffer = audioBuffer;
-    loopSampleSource.connect(fadeInOutGainNode).connect(masterGainNode).connect(audioContext.destination);
-    fadeInOutGainNode.gain.setTargetAtTime(1, 0, time + 0.1);
+    loopSampleSource.connect(gainNodeFadeInOut).connect(gainNodeMaster).connect(audioContext.destination);
+    gainNodeFadeInOut.gain.setTargetAtTime(1, 0, time + 0.1);
     loopSampleSource.start(time);
     loopSampleSource.loop = true;
 }
@@ -183,7 +198,7 @@ function playHoldSample(audioBuffer, time) {
 // but source.stop() deletes the object anyways therefore it has to be the last command
 function stopHoldSample() {
     if (loopSampleSource != undefined) {
-        fadeInOutGainNode.gain.setTargetAtTime(0, 0, 0.1);
+        gainNodeFadeInOut.gain.setTargetAtTime(0, 0, 0.1);
         loopSampleSource.stop(0.3);
     }
 }
@@ -191,55 +206,32 @@ function stopHoldSample() {
 
 // Get Elements From DOM
 
-var bsoundDefaultButtons = document.querySelectorAll(defaultSoundSelector);
-var bsoundImportantButtons = document.querySelectorAll(importantSoundSelector);
-var bsoundHoverButtons = document.querySelectorAll(hoverSoundSelector);
-var bsoundHoldButtons = document.querySelectorAll(holdSoundSelector);
+var buttonsDefault = document.querySelectorAll(soundSelectDefault);
+var buttonsImportant = document.querySelectorAll(soundSelectImportant);
+var buttonsHover = document.querySelectorAll(soundSelectHover);
+var buttonsHold = document.querySelectorAll(soundSelectHold);
 
 
-var masterVolSlider = document.querySelector('#masterVolSlider');
-var masterVolSliderExists = !!document.querySelector('#masterVolSlider');
-var masterVolSliderValue = document.querySelector('#masterVolSliderValue');
-var masterVolSliderValueExists = !!document.querySelector('#masterVolSliderValue');
-
-var masterMuteSwitch = document.getElementById('muteMasterVol');
-masterMuteSwitch.checked = masterVol.getVolumeMuted();
-
-
-var mixerVolDefaultSlider = document.querySelector('#mixerVolDefaultSlider');
-var mixerVolDefaultSliderExists = !!document.querySelector('#mixerVolDefaultSlider');
-var mixerVolDefaultSliderValue = document.querySelector('#mixerVolDefaultSliderValue');
-var mixerVolDefaultSliderValueExists = !!document.querySelector('#mixerVolDefaultSliderValue');
-
-var mixerMuteSwitchDefault = document.getElementById('muteMixerVolDef');
-mixerMuteSwitchDefault.checked = mixerVolDef.getVolumeMuted();
+function getVolumeSettingsDOM (sliderID, sliderValueID, muteID) {
+    var slider = document.getElementById(sliderID);
+    var sliderV = document.getElementById(sliderValueID);
+    var mute = document.getElementById(muteID);
+    return {"slider": slider, "sliderValue":sliderV, "mute":mute};
+}
 
 
-var mixerVolImportantSlider = document.querySelector('#mixerVolImportantSlider');
-var mixerVolImportantSliderExists = !!document.querySelector('#mixerVolImportantSlider');
-var mixerVolImportantSliderValue = document.querySelector('#mixerVolImportantSliderValue');
-var mixerVolImportantSliderValueExists = !!document.querySelector('#mixerVolImportantSliderValue');
+var settingsMaster = getVolumeSettingsDOM('volSliderMaster', 'volSliderMasterValue', 'volMuterMaster');
 
-var mixerMuteSwitchImportant = document.getElementById('muteMixerVolImp');
-mixerMuteSwitchImportant.checked = mixerVolImp.getVolumeMuted();
+var settingsDefault = getVolumeSettingsDOM('volSliderDefault', 'volSliderValueDefault', 'volMuteDefault');
+var settingsImportant = getVolumeSettingsDOM('volSliderImportant', 'volSliderValueImportant', 'volMuteImportant');
+var settingsHover = getVolumeSettingsDOM('volSliderHover', 'volSliderValueHover', 'volMuteHover');
+var settingsHold = getVolumeSettingsDOM('volSliderHold', 'volSliderValueHold', 'volMuteHold');
 
-
-var mixerVolHoverSlider = document.querySelector('#mixerVolHoverSlider');
-var mixerVolHoverSliderExists = !!document.querySelector('#mixerVolHoverSlider');
-var mixerVolHoverSliderValue = document.querySelector('#mixerVolHoverSliderValue');
-var mixerVolHoverSliderValueExists = !!document.querySelector('#mixerVolHoverSliderValue');
-
-var mixerMuteSwitchHover = document.getElementById('muteMixerVolHov');
-mixerMuteSwitchHover.checked = mixerVolHov.getVolumeMuted();
-
-
-var mixerVolHoldSlider = document.querySelector('#mixerVolHoldSlider');
-var mixerVolHoldSliderExists = !!document.querySelector('#mixerVolHoldSlider');
-var mixerVolHoldSliderValue = document.querySelector('#mixerVolHoldSliderValue');
-var mixerVolHoldSliderValueExists = !!document.querySelector('#mixerVolHoldSliderValue');
-
-var mixerMuteSwitchHold = document.getElementById('muteMixerVolHold');
-mixerMuteSwitchHold.checked = mixerVolHold.getVolumeMuted();
+if (!!settingsMaster["mute"]) settingsMaster["mute"].checked = volMaster.getVolumeMuted();
+if (!!settingsDefault["mute"]) settingsDefault["mute"].checked = volDefault.getVolumeMuted();
+if (!!settingsImportant["mute"]) settingsImportant["mute"].checked = volImportant.getVolumeMuted();
+if (!!settingsHover["mute"]) settingsHover["mute"].checked = volHover.getVolumeMuted();
+if (!!settingsHold["mute"]) settingsHold["mute"].checked = volHold.getVolumeMuted();
 
 
 var modalButton = document.getElementById('openModal');
@@ -249,126 +241,140 @@ var modalButton = document.getElementById('openModal');
 
 // Execution
 
-if (masterVolSliderExists) {
-    masterVolSlider.addEventListener('input', function () {
-        masterVol.setVolume(masterVolSlider.value);
-        if (masterVolSliderValueExists) {
-            masterVolSliderValue.innerHTML = masterVol.getVolume();
-        }
-    });
+function addSettingsEventListeners(settingsGroup, volumeGroup) {
+    if (!!settingsGroup['slider']) {
+        settingsGroup['slider'].addEventListener('input', function () {
+            volumeGroup.setVolume(settingsGroup['slider'].value);
+            if (!!settingsGroup['sliderValue']) {
+                settingsGroup['sliderValue'].innerHTML = volumeGroup.getVolume();
+            }
+        });
+    }
+
+    if (!!settingsGroup['mute']) {
+        settingsGroup['mute'].addEventListener('change', function () {
+            if (this.checked) volumeGroup.setVolumeMuted(true);
+            else volumeGroup.setVolumeMuted(false);
+        });
+    }
 }
 
-if (mixerVolDefaultSliderExists) {
-    mixerVolDefaultSlider.addEventListener('input', function () {
-        mixerVolDef.setVolume(mixerVolDefaultSlider.value);
-        if (mixerVolDefaultSliderValueExists) {
-            mixerVolDefaultSliderValue.innerHTML = mixerVolDef.getVolume();
-        }
-    });
+addSettingsEventListeners(settingsMaster, volMaster);
+addSettingsEventListeners(settingsDefault, volDefault);
+addSettingsEventListeners(settingsImportant, volImportant);
+addSettingsEventListeners(settingsHover, volHover);
+addSettingsEventListeners(settingsHold, volHold);
+
+// if (!!settingsMaster['slider']) {
+//     settingsMaster['slider'].addEventListener('input', function () {
+//         volMaster.setVolume(settingsMaster[slider].value);
+//         if (settingsMaster['sliderValue']) {
+//             settingsMaster['sliderValue'].innerHTML = volMaster.getVolume();
+//         }
+//     });
+// }
+
+// if (!!settingsDefault['slider']) {
+//     settingsDefault['slider'].addEventListener('input', function () {
+//         volDefault.setVolume(settingsDefault['slider'].value);
+//         if (!!settingsDefault['sliderValue']) {
+//             settingsDefault['sliderValue'].innerHTML = volDefault.getVolume();
+//         }
+//     });
+// }
+
+// if (!!settingsImportant['slider']) {
+//     settingsImportant['slider'].addEventListener('input', function () {
+//         volImportant.setVolume(settingsImportant['slider'].value);
+//         if (!!settingsImportant['sliderValue']) {
+//             settingsImportant['sliderValue'].innerHTML = volImportant.getVolume();
+//         }
+//     });
+// }
+
+// if (!!settingsHover['slider']) {
+//     settingsHover['slider'].addEventListener('input', function () {
+//         volHover.setVolume(settingsHover['slider'].value);
+//         if (!!settingsHover['sliderValue']) {
+//             settingsHover['sliderValue'].innerHTML = volHover.getVolume();
+//         }
+//     });
+// }
+
+// if (!!settingsHold['slider']) {
+//     settingsHold['slider'].addEventListener('input', function () {
+//         volHold.setVolume(settingsHold['slider'].value);
+//         if (!!settingsHold['sliderValue']) {
+//             settingsHold['sliderValue'].innerHTML = volHold.getVolume();
+//         }
+//     });
+// }
+
+// volMasterMute.addEventListener('change', function () {
+//     if (this.checked) { volMaster.setVolumeMuted(true) }
+//     else { volMaster.setVolumeMuted(false) }
+// });
+
+// mixerVolMuteDefault.addEventListener('change', function () {
+//     if (this.checked) { volDefault.setVolumeMuted(true) }
+//     else { volDefault.setVolumeMuted(false) }
+// });
+
+// mixerVolMuteImportant.addEventListener('change', function () {
+//     if (this.checked) { volImportant.setVolumeMuted(true) }
+//     else { volImportant.setVolumeMuted(false) }
+// });
+
+// mixerVolMuteHover.addEventListener('change', function () {
+//     if (this.checked) { volHover.setVolumeMuted(true) }
+//     else { volHover.setVolumeMuted(false) }
+// });
+
+// mixerVolMuteHold.addEventListener('change', function () {
+//     if (this.checked) { volHold.setVolumeMuted(true) }
+//     else { volHold.setVolumeMuted(false) }
+// });
+
+function startAudioContext() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
 }
-
-if (mixerVolImportantSliderExists) {
-    mixerVolImportantSlider.addEventListener('input', function () {
-        mixerVolImp.setVolume(mixerVolImportantSlider.value);
-        if (mixerVolImportantSliderValueExists) {
-            mixerVolImportantSliderValue.innerHTML = mixerVolImp.getVolume();
-        }
-    });
-}
-
-if (mixerVolHoverSliderExists) {
-    mixerVolHoverSlider.addEventListener('input', function () {
-        mixerVolHov.setVolume(mixerVolHoverSlider.value);
-        if (mixerVolHoverSliderValueExists) {
-            mixerVolHoverSliderValue.innerHTML = mixerVolHov.getVolume();
-        }
-    });
-}
-
-if (mixerVolHoldSliderExists) {
-    mixerVolHoldSlider.addEventListener('input', function () {
-        mixerVolHold.setVolume(mixerVolHoldSlider.value);
-        if (mixerVolHoldSliderValueExists) {
-            mixerVolHoldSliderValue.innerHTML = mixerVolHold.getVolume();
-        }
-    });
-}
-
-
-// MUTE SWITCHES
-
-masterMuteSwitch.addEventListener('change', function () {
-    if (this.checked) { masterVol.setVolumeMuted(true) }
-    else { masterVol.setVolumeMuted(false) }
-});
-
-mixerMuteSwitchDefault.addEventListener('change', function () {
-    if (this.checked) { mixerVolDef.setVolumeMuted(true) }
-    else { mixerVolDef.setVolumeMuted(false) }
-});
-
-mixerMuteSwitchImportant.addEventListener('change', function () {
-    if (this.checked) { mixerVolImp.setVolumeMuted(true) }
-    else { mixerVolImp.setVolumeMuted(false) }
-});
-
-mixerMuteSwitchHover.addEventListener('change', function () {
-    if (this.checked) { mixerVolHov.setVolumeMuted(true) }
-    else { mixerVolHov.setVolumeMuted(false) }
-});
-
-mixerMuteSwitchHold.addEventListener('change', function () {
-    if (this.checked) { mixerVolHold.setVolumeMuted(true) }
-    else { mixerVolHold.setVolumeMuted(false) }
-});
-
-
 
 
 // Sounds
 
 audioBuffers = audioFilesToBuffers(audioUrls).then((response) => {
     samples = response;
-    for (var i = 0; i < bsoundDefaultButtons.length; i++) {
-        bsoundDefaultButtons.item(i).addEventListener('click', function () {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            playDefaultSample(samples[0], 0);
+    for (var i = 0; i < buttonsDefault.length; i++) {
+        buttonsDefault.item(i).addEventListener('click', function () {
+            startAudioContext();
+            playDefaultSample(samples[indexDef]);
         }, false)
     }
-    for (var i = 0; i < bsoundImportantButtons.length; i++) {
-        bsoundImportantButtons.item(i).addEventListener('click', function () {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            playImportantSample(samples[1], 0);
+    for (var i = 0; i < buttonsImportant.length; i++) {
+        buttonsImportant.item(i).addEventListener('click', function () {
+            startAudioContext();
+            playImportantSample(samples[indexImp]);
         }, false)
     }
     if (hoverSoundsAcitvated) {
-        for (var i = 0; i < bsoundHoverButtons.length; i++) {
-            bsoundHoverButtons.item(i).addEventListener('mouseover', function () {
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-                playHoverSample(samples[2], 0);
+        for (var i = 0; i < buttonsHover.length; i++) {
+            buttonsHover.item(i).addEventListener('mouseover', function () {
+                startAudioContext();
+                playHoverSample(samples[indexHov]);
             }, false)
         }
     }
 
-    for (var i = 0; i < bsoundHoldButtons.length; i++) {
-        bsoundHoldButtons.item(i).addEventListener('mousedown', function () {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            playHoldSample(samples[3], 0);
+    for (var i = 0; i < buttonsHold.length; i++) {
+        buttonsHold.item(i).addEventListener('mousedown', function () {
+            startAudioContext();
+            playHoldSample(samples[indexHold], 0);
         })
     }
 
     document.body.addEventListener('mouseup', () => stopHoldSample());
-    // document.body.addEventListener('mouseover', (e) => {
-    //   if (e.target !== button) stopSampleLoop();
-    // });
 });
 
 
@@ -378,20 +384,20 @@ audioBuffers = audioFilesToBuffers(audioUrls).then((response) => {
 // Load values from localStorage if they exist, 
 // otherwise set to default
 
-masterVol.setVolume(parseFloat(localStorage.masterVol == null ? 0.8 : localStorage.masterVol));
-masterVol.setVolumeMuted(localStorage.masterVolMuted == null ? false : localStorage.masterVolMuted);
+volMaster.setVolume(parseFloat(localStorage.volMaster == null ? 0.8 : localStorage.volMaster));
+volMaster.setVolumeMuted(localStorage.volMasterMuted == null ? false : localStorage.volMasterMuted);
 
-mixerVolDef.setVolume(parseFloat(localStorage.mixerVolDef == null ? 0.8 : localStorage.mixerVolDef));
-mixerVolDef.setVolumeMuted(localStorage.mixerVolDefMuted == null ? false : localStorage.mixerVolDefMuted);
+volDefault.setVolume(parseFloat(localStorage.volDefault == null ? 0.8 : localStorage.volDefault));
+volDefault.setVolumeMuted(localStorage.volDefaultMuted == null ? false : localStorage.volDefaultMuted);
 
-mixerVolImp.setVolume(parseFloat(localStorage.mixerVolImp == null ? 0.8 : localStorage.mixerVolImp));
-mixerVolImp.setVolumeMuted(localStorage.mixerVolImpMuted == null ? false : localStorage.mixerVolImpMuted);
+volImportant.setVolume(parseFloat(localStorage.volImportant == null ? 0.8 : localStorage.volImportant));
+volImportant.setVolumeMuted(localStorage.volImportantMuted == null ? false : localStorage.volImportantMuted);
 
-mixerVolHov.setVolume(parseFloat(localStorage.mixerVolHov == null ? 0.8 : localStorage.mixerVolHov));
-mixerVolHov.setVolumeMuted(localStorage.mixerVolHovMuted == null ? false : localStorage.mixerVolHovMuted);
+volHover.setVolume(parseFloat(localStorage.volHover == null ? 0.8 : localStorage.volHover));
+volHover.setVolumeMuted(localStorage.volHoverMuted == null ? false : localStorage.volHoverMuted);
 
-mixerVolHold.setVolume(parseFloat(localStorage.mixerVolHold == null ? 0.8 : localStorage.mixerVolHold));
-mixerVolHold.setVolumeMuted(localStorage.mixerVolHoldMuted == null ? false : localStorage.mixerVolHoldMuted);
+volHold.setVolume(parseFloat(localStorage.volHold == null ? 0.8 : localStorage.volHold));
+volHold.setVolumeMuted(localStorage.volHoldMuted == null ? false : localStorage.volHoldMuted);
 
 
 
@@ -404,12 +410,20 @@ mixerVolHold.setVolumeMuted(localStorage.mixerVolHoldMuted == null ? false : loc
 // }
 
 if (hoverSoundsAcitvated) {
-    if (!mixerVolHov.getVolumeMuted()) {
+    if (!volHover.getVolumeMuted()) {
         modalButton.click();
     }
 }
 
-masterMuteSwitch.click();
-masterMuteSwitch.click();
+settingsMaster['mute'].click();
+settingsMaster['mute'].click();
+settingsDefault['mute'].click();
+settingsDefault['mute'].click();
+settingsImportant['mute'].click();
+settingsImportant['mute'].click();
+settingsHover['mute'].click();
+settingsHover['mute'].click();
+settingsHold['mute'].click();
+settingsHold['mute'].click();
 
 
