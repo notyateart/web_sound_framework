@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W3.CSS Single Page SID</title>
+
+    <!-- W3.CSS -->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+    <style>
+        .bg-darker {
+            background-color: #1d1f21 !important;
+        }
+
+        .text-darker {
+            color: #1d1f21 !important;
+        }
+
+        .w3-sidebar {
+            width: 500px;
+        }
+    </style>
+
+</head>
+
+<body class="bg-dark" data-bs-spy="scroll" data-bs-target=".navbar" data-bs-offset="50">
+
+    <nav class="w3-bar w3-blue">
+        <a class="w3-hover-indigo w3-bar-item w3-button bsoundDefault bsoundHover" href="javascript:void(0)"><b>SID
+                Sound Test</b></a>
+        <a class="w3-hover-indigo w3-bar-item w3-button bsoundDefault bsoundHover" href="javascript:void(0)">Section
+            1</a>
+        <a class="w3-hover-indigo w3-bar-item w3-button bsoundDefault bsoundHover" href="javascript:void(0)">Section
+            2</a>
+        <a class="w3-hover-indigo w3-bar-item w3-button bsoundDefault bsoundHover" href="javascript:void(0)">Section
+            3</a>
+        <button class=" w3-yellow w3-hover-indigo w3-bar-item w3-button w3-right bsoundDefault bsoundHover"
+            onclick="w3_open()">Settings</button>
+    </nav>
+
+
+    <!-- Settings -->
+
+    <div class="w3-sidebar w3-bar-block w3-border-right" style="display:none" id="mySidebar">
+        <button onclick="w3_close()" class="w3-bar-item w3-large w3-hover-indigo w3-yellow">Close &times;</button>
+        <div class="w3-container">
+            <h4>Change Volume:</h4>
+            <div class=" w3-row  w3-round w3-light-gray ">
+                <div class="w3-col w3-half w3-padding">
+                    <div class="w3-row">
+                        <div class="w3-col w3-half">
+                            <label for="volSliderMaster">Master Volume</label>
+                            <br><br>
+                            <input class="w3-check" type="checkbox" role="switch" id="volMuteMaster" />
+                            <label for="volMuteMaster">Mute</label>
+                        </div>
+                        <div class="w3-col w3-half">
+                            <input type="range" min="0" max="1" step="0.01" value="0.8" orient="vertical"
+                                id="volSliderMaster">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class=" w3-row  w3-round w3-light-gray ">
+                <div class="w3-col w3-half w3-padding">
+                    <div class="w3-row">
+                        <div class="w3-col w3-half">
+                            <label for="volSliderDefault">Default Volume</label>
+                            <br><br>
+                            <input class="w3-check" type="checkbox" role="switch" id="volMuteDefault" />
+                            <label for="volMuteDefault">Mute</label>
+                        </div>
+                        <div class="w3-col w3-half">
+                            <input type="range" min="0" max="1" step="0.01" value="0.8" orient="vertical"
+                                id="volSliderDefault">
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-col w3-half w3-padding">
+                    <div class="w3-row">
+                        <div class="w3-col w3-half">
+                            <label for="volSliderImportant">Important Volume</label>
+                            <br><br>
+                            <input class="w3-check" type="checkbox" role="switch" id="volMuteImportant" />
+                            <label for="volMuteImportant">Mute</label>
+                        </div>
+                        <div class="w3-col w3-half">
+                            <input type="range" min="0" max="1" step="0.01" value="0.8" orient="vertical"
+                                id="volSliderImportant">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class=" w3-row  w3-round w3-light-gray ">
+                <div class="w3-col w3-half w3-padding">
+                    <div class="w3-row">
+                        <div class="w3-col w3-half">
+                            <label for="volSliderHover">Hover Volume</label>
+                            <br><br>
+                            <input class="w3-check" type="checkbox" role="switch" id="volMuteHover" />
+                            <label for="volMuteHover">Mute</label>
+                        </div>
+                        <div class="w3-col w3-half">
+                            <input type="range" min="0" max="1" step="0.01" value="0.8" orient="vertical"
+                                id="volSliderHover">
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-col w3-half w3-padding">
+                    <div class="w3-row">
+                        <div class="w3-col w3-half">
+                            <label for="volSliderHold">Hold Volume</label>
+                            <br><br>
+                            <input class="w3-check" type="checkbox" role="switch" id="volMuteHold" />
+                            <label for="volMuteHold">Mute</label>
+                        </div>
+                        <div class="w3-col w3-half">
+                            <input type="range" min="0" max="1" step="0.01" value="0.8" orient="vertical"
+                                id="volSliderHold">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="w3-container">
+        <h3>Buttons</h3>
+        <div class="w3-bar">
+            <button type="button" class="w3-button w3-blue w3-bar-item w3-hover-white">These</button>
+            <button type="button" class="w3-button w3-indigo w3-bar-item w3-hover-white">Buttons</button>
+            <button type="button" class="w3-button w3-pink w3-bar-item w3-hover-white">Generate</button>
+            <button type="button" class="w3-button w3-yellow w3-bar-item w3-hover-white">Sound</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>Sliders</h3>
+        <input type="range" name="someRangeSlider" class="bsoundHold" min="0" max="1" value="0.8" step="0.01"
+            orient="horizontal">
+        <p class="btn bg-danger text-white" id="presslight">Slider Pressed</p>
+    </div>
+
+
+
+    <!-- Trigger/Open the Modal -->
+    <button id="openModal" onclick="document.getElementById('w3-modal').style.display='block'"
+        class="w3-button w3-hide">Open
+        Modal</button>
+
+    <!-- The Modal -->
+    <div id="w3-modal" class="w3-modal">
+        <div class="w3-modal-content">
+            <div class="w3-container">
+                <span onclick="document.getElementById('w3-modal').style.display='none'"
+                    class="w3-button w3-indigo w3-display-topright">&times;</span>
+                <p>
+                    Unfortunately browers block a site's sound until a user has interacted with it.<br>
+                    Thus, for full functionality of this site, this pop-up is a requirement.<br>
+                    <br>
+                    You can change sound settings at any time by visiting the settings menu.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <footer>
+        <script>
+
+            var soundSelectDefault = ".w3-button.w3-blue, .w3-button.w3-indigo, .w3-bar-item, .w3-check";
+            var soundSelectImportant = ".w3-button.w3-yellow, .w3-button.w3-pink";
+            var soundSelectHover = ".w3-hover-indigo, .w3-hover-white";
+            var soundSelectHold = "input[type='range']";
+
+
+            function w3_open() {
+                document.getElementById("mySidebar").style.display = "block";
+            }
+
+            function w3_close() {
+                document.getElementById("mySidebar").style.display = "none";
+            }
+            
+        </script>
+        <script src="sid_functions.js"></script>
+        <script src="sid_settings.js"></script>
+        <!-- <script src="index.js"></script> -->
+        <!-- <script>
+			document.getElementById('openModal').click();;
+		</script> -->
+    </footer>
+
+</body>
+
+</html>
